@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html class="js" lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="application-name" content="Raspberry PI 3 Model B Acess Point" />
+        <meta name="description" content="Tutorial para transformar o seu Raspberry PI 3 Model B em um Ponto de Acesso Wi-Fi" />
+        <meta name="keywords" content="Raspberry, AP, Wi-Fi" />
+        <meta name="author" content="Évson Custódio Oliveira" />
+        <title>RPI3AP</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+        <script>
+            
+        </script>
+        <style>
+
+        </style>
+    </head>
+    <body class="container">
+        <header class="jumbotron">
+            <h1 class="text-center">Como gerar um rede Wi-Fi pelo seu Raspberry PI 3</h1>
+        </header>
+        <main>
+            <article>
+                <section>
+                    <header>
+                        <h2>Passo 1: Atualizar o RPI3</h2>
+                    </header>
+                    <p>
+                        <br />Depois de ter feito todo o procedimento de instalação do Sistema Operacional Raspbian em seu Raspberry,
+                        devemos atualiza-lo, para isso abra o seu Terminal e execute os seguintes comandos:<br />
+                    </p>
+                    <code>
+                        sudo apt update<br />
+                        sudo apt upgrade<br />
+                        sudo rpi-update
+                    </code>
+                    <footer>
+                        <p>
+                            <br />Obs: Mantenha o Terminal aberto, pois todo o processo de configuração será através dele!<br />
+                        </p>
+                    </footer>
+                </section>
+                
+                <section>
+                    <header>
+                        <h2>Passo 2: Instalar os pacotes necessários</h2>
+                    </header>
+                    <p>
+                        <br />Iremos agora instalar dois pacotes para configurar nossa rede, eles são:<br />
+                    </p>
+                    <p>
+                        <span style="color:red;">hostapd</span> - Host Access Point Daemon é um ponto de acesso ao software do espaço do usuário capaz de transformar as placas de interface de rede normais em pontos de acesso e servidores de autenticação<br />
+                        <span style="color:red;">dnsmasq</span> - É um servidor DHCP / DNS simples que pode ser usado em uma rede local de até 1000 clientes. As principais características são a configuração fácil e uma pequena pegada do sistema. Também possui suporte para IPv6.<br />
+                    </p>
+                    <p>
+                        No Terminal execute os seguintes comandos:<br />
+                    </p>
+                    <code>
+                        sudo apt install hostapd<br />
+                        sudo apt install dnsmasq
+                    </code>
+                </section>
+                <br />
+                <section>
+                    <header>
+                        <h2>Passo 3: Configurar o <span style="color:red;">hostapd</span></h2>
+                    </header>
+                    <p>
+                        <br />Depois de instalado todos os pacotes, vamos configurar o <span style="color:red;">hostapd</span>, para isso, abra o seu arquivo de configuração com o seguinte comando:<br />
+                    </p>
+                    <code>
+                        sudo nano /etc/hostapd/hostapd.conf
+                    </code>
+                    <p>
+                        <br />Uma nova janela do nano deve ter aberto com o determinado arquivo, adicione as seguintes linhas no arquivo:<br />
+                    </p>
+                    <code>
+                        interface=wlan0<br />
+                        driver=nl80211<br />
+                        ssid=<span style="color:red;">NOME_DA_REDE</span><br />
+                        hw_mode=g<br />
+                        channel=10<br />
+                        ieee80211n=1<br />
+                        wmm_enabled=1<br />
+                        macaddr_acl=0<br />
+                        auth_algs=1<br />
+                        ignore_broadcast_ssid=0<br />
+                        wpa=2<br />
+                        wpa_key_mgmt=WPA-PSK<br />
+                        wpa_passphrase=<span style="color:red;">SENHA_DA_REDE</span><br />
+                        wpa_pairwise=TKIP<br />
+                        rsn_pairwise=CCMP
+                    </code>
+                    <p>
+                        <br />Obs: <span style="color:red;">NOME_DA_REDE</span> e <span style="color:red;">SENHA_DA_REDE</span> representam o nome e a senha de sua escolha respectivamente na configuração.<br />
+                        Salve o arquivo e saia do nano, agora iremos adicionar as configurações para inicialização, execute o seguinte comando:<br />
+                    </p>
+                    <code>
+                        sudo nano /etc/default/hostapd
+                    </code>
+                    <p>
+                        <br />Irá abrir o arquivo de inicialização, procure pela linha comentada:<br />
+                    </p>
+                    <code>
+                        #DAEMON_CONF=""
+                    </code>
+                    <p>
+                        <br />Substitua pelo caminho do arquivo de configuração do <span style="color:red;">hostapd:</span>
+                    </p>
+                    <code>
+                        #DAEMON_CONF="/etc/hostapd/hostapd.conf"
+                    </code>
+                    <p>
+                        <br />Salve o arquivo e saia do nano<br />
+                    </p>
+                </section>
+                <br />
+                <section>
+                    <header>
+                        <h2>Passo 4: Configurar o <span style="color:red;">dnsmasq</span></h2>
+                    </header>
+                    <p>
+                        <br />Agora iremos configurar o <span style="color:red">dnsmasq</span>, abra o arquivo de configuração com o seguinte comando:<br />
+                    </p>
+                    <code>
+                        sudo nano /etc/dnsmasq.conf
+                    </code>
+                    <p>
+                        <br />Adicione as seguintes linhas no final do arquivo:<br />
+                    </p>
+                    <code>
+                        no-resolv<br />
+                        interface=wlan0<br />
+                        listen-address=127.0.0.1<br />
+                        bind-interfaces<br />
+                        server=8.8.8.8<br />
+                        dhcp-range=10.0.0.2,10.0.0.254,12h
+                    </code>
+                    <p>
+                        <br />Salve o arquivo e saia do nano<br />
+                    </p>
+                </section>
+                <section>
+                    <header>
+                        <h2>Passo 5: Configurar a interface de Rede</h2>
+                    </header>
+                    <p>
+                        <br />Depois de configuradas as bibliotecas necessárias, agora iremos configurar nossa interface de Rede <span style="color:red;">wlan0</span>, para isso iremos abrir o arquivo de interfaces com o seguinte comando:<br />
+                    </p>
+                    <code>
+                        sudo nano /etc/network/interfaces
+                    </code>
+                    <p>
+                        <br />Modifique a seção da interface <span style="color:red;">wlan0</span> para que fique dessa forma:<br />
+                    </p>
+                    <code>
+                        auto lo wlan0<br />
+                        iface lo inet loopback<br /><br />
+
+                        allow-hotplug wlan0<br />
+                        iface wlan0 inet static<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;address 10.0.0.1<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;netmask 255.255.255.0<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;network 10.0.0.0<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;broadcast 10.0.0.255<br />
+                        #&nbsp;&nbsp;&nbsp;&nbsp;wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+                    </code>
+                    <p>
+                        <br />Obs: Se houver algo parecido com as suas redes Wi-Fi, comente as linhas colocando um '#' na frente de cada linha, dessa forma:<br />
+                    </p>
+                    <code>
+                        #iface wlan0 inet dhcp<br />
+                        #&nbsp;&nbsp;&nbsp;&nbsp;wpa-ssid "SUA_REDE_WIFI"<br />
+                        #&nbsp;&nbsp;&nbsp;&nbsp;wpa-psk "SENHA_DA_SUA_REDE_WIFI"
+                    </code>
+                    <p>
+                        <br />Esses detalhes devem em /etc/wpa_supplicant/wpa_supplicant.conf, salve e feche o arquivo e anterior e execute o seguinte comando:<br />
+                    </p>
+                    <code>
+                        sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
+                    </code>
+                    <p>
+                        <br />Adicione as redes da seguinte forma:<br />
+                    </p>
+                    <code>
+                        network = {<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;ssid="SUA_REDE_WIFI"<br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;psk="SENHA_DA_SUA_REDE_WIFI"<br />
+                        &emsp;&nbsp;&nbsp;&nbsp;key_mgmt=WPA-PSK<br />
+                        }
+                    </code>
+                    <p>
+                        <br />Salve e feche o arquivo.<br />
+                    </p>
+                </section>
+                <section>
+                    <header>
+                        <h2>Passo 6: Adicionando a inicialização</h2>
+                    </header>
+                    <p>
+                        <br />Abra o arquivo de inicialização do sistema, com o comando:<br />
+                    </p>
+                    <code>
+                        sudo nano /etc/rc.local
+                    </code>
+                    <p>
+                        <br />Adicione as seguintes linhas antes da linha "return 0" do arquivo:<br />
+                    </p>
+                    <code>
+                        service hostapd start<br />
+                        service dnsmasq start
+                    </code>
+                    <p>
+                        <br />Salve e feche o arquivo, agora reinicie o Raspberry e tudo estará funcionando.<br />
+                    </p>
+                </section>
+            </article>
+        </main>
+        <footer>
+            <h4 class="text-center">Copyright LAW-UVV&copy</h3>
+        </footer>
+    </body>
+</html>
